@@ -11,6 +11,7 @@ void generateCode(const StructInfoVector& structInfos) {
     for(const auto& info : structInfos) {
         file << "typedef struct\n{\n";
 
+        int spareId = 1;
         for(auto iter = info.props.rbegin(); iter != info.props.rend(); iter++) {
             const auto& prop = *iter;
             /// 处理名称的特殊字符
@@ -20,6 +21,8 @@ void generateCode(const StructInfoVector& structInfos) {
             }, '_');
             if (name[name.length()-1] == '_') {
                 name = name.substr(0, name.length()-1);
+            if (name == "spare") {
+                name += std::to_string(spareId++);
             }
 
             /// bit有两种形式: [x] [x:y]
