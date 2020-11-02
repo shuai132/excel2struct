@@ -12,4 +12,7 @@ option(TESTS "xlnt tests" OFF)
 add_subdirectory(modules/xlnt)
 link_libraries(xlnt)
 
-add_executable(xlsx2struct main.cpp)
+add_executable(xlsx2struct
+        generate_code.cpp
+        parse_excel.cpp
+        main.cpp)
