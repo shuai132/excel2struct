@@ -17,10 +17,19 @@ void generateCode(const StructInfoVector& structInfos) {
             /// 处理名称的特殊字符
             std::string name = prop.name;
             std::replace_if(name.begin(), name.end(), [](const char& c){
-                return c == '[' || c == ']' || c == ':';
+                return c == '[' || c == ']' || c == ':' || c == '\'';
             }, '_');
-            if (name[name.length()-1] == '_') {
-                name = name.substr(0, name.length()-1);
+            auto deleteEndChar = [](std::string& str, char c) {
+                if (str[str.length() - 1] == c) {
+                    str = str.substr(0, str.length() - 1);
+                }
+            };
+            deleteEndChar(name, '_');//转换多余的
+            deleteEndChar(name, ',');//来自excel
+            // 处理这种形式的名字：5'h0
+            if ('0' <= name[0] and name[0] <= '9') {
+                name = "_" + name;
+            }
             if (name == "spare") {
                 name += std::to_string(spareId++);
             }
