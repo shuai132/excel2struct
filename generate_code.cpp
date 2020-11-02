@@ -10,7 +10,9 @@ void generateCode(const StructInfoVector& structInfos) {
     file << "#include <stdint.h>\n\n";
     for(const auto& info : structInfos) {
         file << "typedef struct\n{\n";
-        for(const auto& prop : info.props) {
+
+        for(auto iter = info.props.rbegin(); iter != info.props.rend(); iter++) {
+            const auto& prop = *iter;
             /// 处理名称的特殊字符
             std::string name = prop.name;
             std::replace_if(name.begin(), name.end(), [](const char& c){
