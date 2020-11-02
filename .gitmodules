@@ -1,0 +1,6 @@
+[submodule "modules/LOG"]
+	path = modules/LOG
+	url = https://github.com/shuai132/LOG.git
+[submodule "modules/xlnt"]
+	path = modules/xlnt
+	url = https://gitee.com/mirrors/xlnt.git
