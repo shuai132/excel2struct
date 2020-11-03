@@ -4,6 +4,7 @@
 
 static const int COL_OFFSET     = 'A' - 1;
 static const int COL_IP_NAME    = 'A' - COL_OFFSET;
+static const int COL_BLOCK      = 'B' - COL_OFFSET;
 static const int COL_ADDRESS    = 'C' - COL_OFFSET;
 static const int COL_BITS       = 'D' - COL_OFFSET;
 static const int COL_REG        = 'E' - COL_OFFSET;
@@ -14,7 +15,6 @@ static const int COL_TYPE       = 'I' - COL_OFFSET;
 StructInfoVector parseExcel(const std::string& excelPath) {
     auto wb = std::make_unique<xlnt::workbook>(xlnt::path(excelPath));
     auto sheetNR = wb->sheet_by_title("V_NR");
-    auto sheetNRSW = wb->sheet_by_title("V_NR_SW");
 
     LOG("parse start...");
     StructInfoVector structInfos;
@@ -29,8 +29,9 @@ StructInfoVector parseExcel(const std::string& excelPath) {
         throw std::runtime_error("ip name should be V_NR!!!");
     } else {
         StructInfo info;
+        info.name = ipName;
         info.address = sheetNR.cell(COL_ADDRESS, row).value<std::string>();
-        info.name = info.address; // todo: name it from table/file
+        info.block = sheetNR.cell(COL_BLOCK, row).value<std::string>();
         // info 包含多个位域 循环解析
         for(;;)
         {

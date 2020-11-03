@@ -11,6 +11,7 @@ struct StructInfo {
     };
     std::string comments;
     std::string name;
+    std::string block;
     std::string address;
 
     struct Prop {

@@ -1,6 +1,9 @@
 #include <fstream>
+#include <sstream>
 
 #include "generate_code.h"
+#include "template.h"
+#include "string_utils.h"
 #include "log.h"
 
 void generateCode(const StructInfoVector& structInfos) {
@@ -9,10 +12,9 @@ void generateCode(const StructInfoVector& structInfos) {
     file.clear();
     file << "#include <stdint.h>\n\n";
     for(const auto& info : structInfos) {
-        file << "typedef struct\n{\n";
-
         int spareId = 1;
         int reservedId = 1;
+        std::stringstream allProp;
         for(auto iter = info.props.rbegin(); iter != info.props.rend(); iter++) {
             const auto& prop = *iter;
             /// 处理名称的特殊字符
@@ -21,6 +23,7 @@ void generateCode(const StructInfoVector& structInfos) {
                 return c == '[' || c == ']' || c == ':' || c == '\''
                 || c == '{' || c == '}'
                 || c == ','
+                || c == '\n'
                 || c == ' ';
             }, '_');
             auto deleteEndChar = [](std::string& str, char c) {
@@ -60,11 +63,16 @@ void generateCode(const StructInfoVector& structInfos) {
                 return c == '\n';
             }, ' ');
 
-            file << "    volatile uint32_t "
-                 << name
-                 << ":"
-                 << bits
-                 << "; "
+            /// rw
+            std::string rw;
+            if (prop.rw == "R/W") rw = "__IO";
+            else if (prop.rw == "R") rw = "__O";
+            else if (prop.rw == "W") rw = "__I";
+
+            std::string tmp = ReplaceAll(TEMPLATE_PROP, "${RW}", rw);
+            tmp = ReplaceAll(tmp, "${NAME}", name);
+            tmp = ReplaceAll(tmp, "${WIDTH}", bits);
+            allProp << tmp
                  << "/* "
                  << prop.bits << " "
                  << prop.rw << " "
@@ -72,7 +80,14 @@ void generateCode(const StructInfoVector& structInfos) {
                  << " */"
                  << std::endl;
         }
-        file << "} " << "T_" << info.name << ";\n\n";
+        std::string tmp(TEMPLATE_DEFINE);
+        auto rp = [&](auto target, auto rep){
+            tmp = ReplaceAll(tmp, target, rep);
+        };
+        rp("${BLOCK}", info.block);
+        rp("${OFFSET}", info.address.substr(7));
+        rp("${STRUCT_PROP}", allProp.str());
+        file << tmp;
     }
     file.flush();
 }
