@@ -12,12 +12,16 @@ void generateCode(const StructInfoVector& structInfos) {
         file << "typedef struct\n{\n";
 
         int spareId = 1;
+        int reservedId = 1;
         for(auto iter = info.props.rbegin(); iter != info.props.rend(); iter++) {
             const auto& prop = *iter;
             /// 处理名称的特殊字符
             std::string name = prop.name;
             std::replace_if(name.begin(), name.end(), [](const char& c){
-                return c == '[' || c == ']' || c == ':' || c == '\'';
+                return c == '[' || c == ']' || c == ':' || c == '\''
+                || c == '{' || c == '}'
+                || c == ','
+                || c == ' ';
             }, '_');
             auto deleteEndChar = [](std::string& str, char c) {
                 if (str[str.length() - 1] == c) {
@@ -32,6 +36,8 @@ void generateCode(const StructInfoVector& structInfos) {
             }
             if (name == "spare") {
                 name += std::to_string(spareId++);
+            } else if (name == "reserved") {
+                name += std::to_string(reservedId++);
             }
 
             /// bit有两种形式: [x] [x:y]
